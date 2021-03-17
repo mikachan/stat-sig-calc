@@ -17,6 +17,12 @@ interface CalculatorState {
 	zScore: number;
 	pValue: number;
 }
+
+enum ConfidenceLevels {
+	Ninety = 90,
+	NinetyFive = 95,
+	NinetyNine = 99,
+}
 function Calculator() {
 	const initialCalcState: CalculatorState = {
 		numOfVisitorsControl: 0,
@@ -58,7 +64,8 @@ function Calculator() {
 	};
 
 	const roundUp = (num: number): number => {
-		return +num.toFixed(2);
+		//return +num.toFixed(2);
+		return num;
 	};
 
 	const calcConversionRate = (
@@ -75,6 +82,44 @@ function Calculator() {
 		return roundUp(
 			Math.sqrt((conversionRate * (1 - conversionRate)) / visitors)
 		);
+	};
+
+	const calcConfidence = (confidenceLevel: ConfidenceLevels): string => {
+		if (confidenceLevel === ConfidenceLevels.Ninety) {
+			if (pValue < 0.1 || pValue > 0.9) return 'Yes';
+		}
+
+		if (confidenceLevel === ConfidenceLevels.NinetyFive) {
+			if (pValue < 0.05 || pValue > 0.95) return 'Yes';
+		}
+
+		if (confidenceLevel === ConfidenceLevels.NinetyNine) {
+			if (pValue < 0.01 || pValue > 0.99) return 'Yes';
+		}
+
+		return 'No';
+	};
+
+	const calcZScore = (
+		conversionRateControl: number,
+		conversionRateVariant: number
+	): number => {
+		const zScore =
+			(conversionRateControl - conversionRateVariant) /
+			Math.sqrt(
+				Math.pow(standardErrorControl, 2) +
+					Math.pow(standardErrorVariant, 2)
+			);
+
+		return roundUp(zScore);
+	};
+
+	const findNormalDistribution = (num: number) => {
+		return Math.pow(Math.E, -Math.pow(num, 2) / 2) / Math.sqrt(2 * Math.PI);
+	};
+
+	const calcPValue = (zScore: number): number => {
+		return roundUp(findNormalDistribution(zScore));
 	};
 
 	const calculateSignificance = () => {
@@ -103,6 +148,25 @@ function Calculator() {
 					conversionRateVariant,
 					numOfVisitorsVariant
 				),
+			}));
+		}
+
+		if (
+			numOfConversionsControl &
+			numOfVisitorsControl &
+			numOfConversionsVariant &
+			numOfVisitorsVariant
+		) {
+			setCalcState((prevState) => ({
+				...prevState,
+				confidence90: calcConfidence(ConfidenceLevels.Ninety),
+				confidence95: calcConfidence(ConfidenceLevels.NinetyFive),
+				confidence99: calcConfidence(ConfidenceLevels.NinetyNine),
+				zScore: calcZScore(
+					conversionRateControl,
+					conversionRateVariant
+				),
+				pValue: calcPValue(zScore),
 			}));
 		}
 	};
@@ -195,7 +259,7 @@ function Calculator() {
 											onChange={(e) => {
 												setCalcState((prevState) => ({
 													...prevState,
-													numOfVisitorsVariant: parseInt(
+													numOfConversionsVariant: parseInt(
 														e.target.value
 													),
 												}));
