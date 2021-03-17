@@ -11,6 +11,11 @@ interface CalculatorState {
 	numOfConversionsVariant: number;
 	conversionRateVariant: number;
 	standardErrorVariant: number;
+	confidence90: string;
+	confidence95: string;
+	confidence99: string;
+	zScore: number;
+	pValue: number;
 }
 function Calculator() {
 	const initialCalcState: CalculatorState = {
@@ -22,6 +27,11 @@ function Calculator() {
 		numOfConversionsVariant: 0,
 		conversionRateVariant: 0,
 		standardErrorVariant: 0,
+		confidence90: 'No',
+		confidence95: 'No',
+		confidence99: 'No',
+		zScore: 0,
+		pValue: 0,
 	};
 
 	const [
@@ -34,6 +44,11 @@ function Calculator() {
 			numOfConversionsVariant,
 			conversionRateVariant,
 			standardErrorVariant,
+			confidence90,
+			confidence95,
+			confidence99,
+			zScore,
+			pValue,
 		},
 		setCalcState,
 	] = React.useState<CalculatorState>(initialCalcState);
@@ -41,9 +56,6 @@ function Calculator() {
 	const clearState = () => {
 		setCalcState({ ...initialCalcState });
 	};
-
-	const [calculatedSig, setCalculatedSig] = React.useState<number>(0);
-	const [pValue, setPValue] = React.useState<number>(0);
 
 	const roundUp = (num: number): number => {
 		return +num.toFixed(2);
@@ -93,8 +105,6 @@ function Calculator() {
 				),
 			}));
 		}
-
-		setCalculatedSig(1);
 	};
 
 	return (
@@ -196,18 +206,50 @@ function Calculator() {
 									<td>{conversionRateVariant}</td>
 									<td>{standardErrorVariant}</td>
 								</tr>
+								<tr>
+									<td colSpan={5} align="right">
+										<button type="reset">Clear</button>
+									</td>
+								</tr>
 							</tbody>
 						</table>
-
-						<button type="reset">Clear</button>
 					</form>
 				</div>
 				<div>
-					<h3>Significance</h3>
-					<strong>Z-score:</strong> {calculatedSig}
-					<br />
-					<strong>P-value:</strong> {pValue}
-					<br />
+					<table>
+						<thead>
+							<tr>
+								<td colSpan={2}>
+									<h3>Significance Levels</h3>
+								</td>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>90% confidence</td>
+								<td>{confidence90}</td>
+							</tr>
+							<tr>
+								<td>95% confidence</td>
+								<td>{confidence95}</td>
+							</tr>
+							<tr>
+								<td>99% confidence</td>
+								<td>{confidence99}</td>
+							</tr>
+							<tr>
+								<td>&nbsp;</td>
+							</tr>
+							<tr>
+								<td>Z-score</td>
+								<td>{zScore}</td>
+							</tr>
+							<tr>
+								<td>P-value</td>
+								<td>{pValue}</td>
+							</tr>
+						</tbody>
+					</table>
 				</div>
 			</div>
 		</div>
