@@ -1,5 +1,15 @@
 import './Calculator.css';
 
+import {
+	ConfidenceLevels,
+	calcConfidence,
+	calcConversionRate,
+	calcPValue,
+	calcStandardError,
+	calcZScore,
+	roundUp,
+} from './utils';
+
 import React from 'react';
 
 interface CalculatorState {
@@ -18,11 +28,6 @@ interface CalculatorState {
 	pValue: number;
 }
 
-enum ConfidenceLevels {
-	Ninety = 90,
-	NinetyFive = 95,
-	NinetyNine = 99,
-}
 function Calculator() {
 	const initialCalcState: CalculatorState = {
 		numOfVisitorsControl: 0,
@@ -61,65 +66,6 @@ function Calculator() {
 
 	const clearState = () => {
 		setCalcState({ ...initialCalcState });
-	};
-
-	const roundUp = (num: number): number => {
-		return +num.toFixed(2);
-	};
-
-	const calcConversionRate = (
-		conversions: number,
-		visitors: number
-	): number => {
-		return conversions / visitors;
-	};
-
-	const calcStandardError = (
-		conversionRate: number,
-		visitors: number
-	): number => {
-		return Math.sqrt((conversionRate * (1 - conversionRate)) / visitors);
-	};
-
-	const calcConfidence = (
-		confidenceLevel: ConfidenceLevels,
-		pValue: number
-	): string => {
-		if (confidenceLevel === ConfidenceLevels.Ninety) {
-			if (pValue < 0.1 || pValue > 0.9) return 'Yes';
-		}
-
-		if (confidenceLevel === ConfidenceLevels.NinetyFive) {
-			if (pValue < 0.05 || pValue > 0.95) return 'Yes';
-		}
-
-		if (confidenceLevel === ConfidenceLevels.NinetyNine) {
-			if (pValue < 0.01 || pValue > 0.99) return 'Yes';
-		}
-
-		return 'No';
-	};
-
-	const calcZScore = (
-		conversionRateControl: number,
-		conversionRateVariant: number
-	): number => {
-		const zScore =
-			(conversionRateControl - conversionRateVariant) /
-			Math.sqrt(
-				Math.pow(standardErrorControl, 2) +
-					Math.pow(standardErrorVariant, 2)
-			);
-
-		return zScore;
-	};
-
-	const findNormalDistribution = (num: number) => {
-		return Math.pow(Math.E, -Math.pow(num, 2) / 2) / Math.sqrt(2 * Math.PI);
-	};
-
-	const calcPValue = (zScore: number): number => {
-		return findNormalDistribution(zScore);
 	};
 
 	const calculateSignificance = () => {
@@ -161,7 +107,9 @@ function Calculator() {
 				...prevState,
 				zScore: calcZScore(
 					conversionRateControl,
-					conversionRateVariant
+					conversionRateVariant,
+					standardErrorControl,
+					standardErrorVariant
 				),
 			}));
 
