@@ -2,88 +2,97 @@ import './Calculator.css';
 
 import React from 'react';
 
+interface CalculatorState {
+	numOfVisitorsControl: number;
+	numOfConversionsControl: number;
+	conversionRateControl: number;
+	standardErrorControl: number;
+	numOfVisitorsVariant: number;
+	numOfConversionsVariant: number;
+	conversionRateVariant: number;
+	standardErrorVariant: number;
+}
 function Calculator() {
-	const [
-		numOfVisitorsControl,
-		setNumOfVisitorsControl,
-	] = React.useState<number>(0);
-	const [
-		numOfConversionsControl,
-		setNumOfConversionsControl,
-	] = React.useState<number>(0);
-	const [
-		conversionRateControl,
-		setConversionRateControl,
-	] = React.useState<number>(0);
-	const [
-		standardErrorControl,
-		setStandardErrorControl,
-	] = React.useState<number>(0);
+	const initialCalcState: CalculatorState = {
+		numOfVisitorsControl: 0,
+		numOfConversionsControl: 0,
+		conversionRateControl: 0,
+		standardErrorControl: 0,
+		numOfVisitorsVariant: 0,
+		numOfConversionsVariant: 0,
+		conversionRateVariant: 0,
+		standardErrorVariant: 0,
+	};
 
 	const [
-		numOfVisitorsVariant,
-		setNumOfVisitorsVariant,
-	] = React.useState<number>(0);
-	const [
-		numOfConversionsVariant,
-		setNumOfConversionsVariant,
-	] = React.useState<number>(0);
-	const [
-		conversionRateVariant,
-		setConversionRateVariant,
-	] = React.useState<number>(0);
-	const [
-		standardErrorVariant,
-		setStandardErrorVariant,
-	] = React.useState<number>(0);
+		{
+			numOfVisitorsControl,
+			numOfConversionsControl,
+			conversionRateControl,
+			standardErrorControl,
+			numOfVisitorsVariant,
+			numOfConversionsVariant,
+			conversionRateVariant,
+			standardErrorVariant,
+		},
+		setCalcState,
+	] = React.useState<CalculatorState>(initialCalcState);
+
+	const clearState = () => {
+		setCalcState({ ...initialCalcState });
+	};
 
 	const [calculatedSig, setCalculatedSig] = React.useState<number>(0);
 	const [pValue, setPValue] = React.useState<number>(0);
 
-	const handleControlVisitorChange = (
-		e: React.ChangeEvent<HTMLInputElement>
-	) => {
-		setNumOfVisitorsControl(parseInt(e.target.value));
+	const roundUp = (num: number): number => {
+		return +num.toFixed(2);
 	};
 
-	const handleControlConversionChange = (
-		e: React.ChangeEvent<HTMLInputElement>
-	) => {
-		setNumOfConversionsControl(parseInt(e.target.value));
+	const calcConversionRate = (
+		conversions: number,
+		visitors: number
+	): number => {
+		return roundUp(conversions / visitors);
 	};
 
-	const handleVariantVisitorChange = (
-		e: React.ChangeEvent<HTMLInputElement>
-	) => {
-		setNumOfVisitorsVariant(parseInt(e.target.value));
-	};
-
-	const handleVariantConversionChange = (
-		e: React.ChangeEvent<HTMLInputElement>
-	) => {
-		setNumOfConversionsVariant(parseInt(e.target.value));
+	const calcStandardError = (
+		conversionRate: number,
+		visitors: number
+	): number => {
+		return roundUp(
+			Math.sqrt((conversionRate * (1 - conversionRate)) / visitors)
+		);
 	};
 
 	const calculateSignificance = () => {
-		setConversionRateControl(
-			numOfConversionsControl / numOfVisitorsControl
-		);
-		setStandardErrorControl(
-			Math.sqrt(
-				(conversionRateControl * (1 - conversionRateControl)) /
+		if (numOfConversionsControl & numOfVisitorsControl) {
+			setCalcState((prevState) => ({
+				...prevState,
+				conversionRateControl: calcConversionRate(
+					numOfConversionsControl,
 					numOfVisitorsControl
-			)
-		);
+				),
+				standardErrorControl: calcStandardError(
+					conversionRateControl,
+					numOfVisitorsControl
+				),
+			}));
+		}
 
-		setConversionRateVariant(
-			numOfConversionsVariant / numOfVisitorsVariant
-		);
-		setStandardErrorVariant(
-			Math.sqrt(
-				(conversionRateVariant * (1 - conversionRateVariant)) /
+		if (numOfConversionsVariant & numOfVisitorsVariant) {
+			setCalcState((prevState) => ({
+				...prevState,
+				conversionRateVariant: calcConversionRate(
+					numOfConversionsVariant,
 					numOfVisitorsVariant
-			)
-		);
+				),
+				standardErrorVariant: calcStandardError(
+					conversionRateVariant,
+					numOfVisitorsVariant
+				),
+			}));
+		}
 
 		setCalculatedSig(1);
 	};
@@ -95,7 +104,7 @@ function Calculator() {
 					<h1>Statistical Significance Calculator</h1>
 				</header>
 				<div>
-					<form noValidate autoComplete="off">
+					<form noValidate autoComplete="off" onReset={clearState}>
 						<table>
 							<thead>
 								<tr>
@@ -111,47 +120,77 @@ function Calculator() {
 									<td>Control</td>
 									<td>
 										<input
-											id="visitors"
+											id="visitorsControl"
 											type="number"
+											min={numOfConversionsControl}
 											value={numOfVisitorsControl}
-											onChange={
-												handleControlVisitorChange
-											}
+											onChange={(e) => {
+												setCalcState((prevState) => ({
+													...prevState,
+													numOfVisitorsControl: parseInt(
+														e.target.value
+													),
+												}));
+												calculateSignificance();
+											}}
 										/>
 									</td>
 									<td>
 										<input
-											id="conversions"
+											id="conversionsControl"
 											type="number"
+											min="0"
+											max={numOfVisitorsControl}
 											value={numOfConversionsControl}
-											onChange={
-												handleControlConversionChange
-											}
+											onChange={(e) => {
+												setCalcState((prevState) => ({
+													...prevState,
+													numOfConversionsControl: parseInt(
+														e.target.value
+													),
+												}));
+												calculateSignificance();
+											}}
 										/>
 									</td>
 									<td>{conversionRateControl}</td>
 									<td>{standardErrorControl}</td>
 								</tr>
 								<tr>
-									<tr>Variant</tr>
+									<td>Variant</td>
 									<td>
 										<input
-											id="visitors"
+											id="visitorsVariant"
 											type="number"
+											min={numOfConversionsVariant}
 											value={numOfVisitorsVariant}
-											onChange={
-												handleVariantVisitorChange
-											}
+											onChange={(e) => {
+												setCalcState((prevState) => ({
+													...prevState,
+													numOfVisitorsVariant: parseInt(
+														e.target.value
+													),
+												}));
+												calculateSignificance();
+											}}
 										/>
 									</td>
 									<td>
 										<input
-											id="conversions"
+											id="conversionsVariant"
 											type="number"
+											min="0"
+											max={numOfVisitorsVariant}
 											value={numOfConversionsVariant}
-											onChange={
-												handleVariantConversionChange
-											}
+											onChange={(e) => {
+												setCalcState((prevState) => ({
+													...prevState,
+													numOfVisitorsVariant: parseInt(
+														e.target.value
+													),
+												}));
+												calculateSignificance();
+											}}
 										/>
 									</td>
 									<td>{conversionRateVariant}</td>
@@ -160,9 +199,7 @@ function Calculator() {
 							</tbody>
 						</table>
 
-						<button onClick={() => calculateSignificance()}>
-							Calculate
-						</button>
+						<button type="reset">Clear</button>
 					</form>
 				</div>
 				<div>
