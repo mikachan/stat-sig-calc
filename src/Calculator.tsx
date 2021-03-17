@@ -84,7 +84,10 @@ function Calculator() {
 		);
 	};
 
-	const calcConfidence = (confidenceLevel: ConfidenceLevels): string => {
+	const calcConfidence = (
+		confidenceLevel: ConfidenceLevels,
+		pValue: number
+	): string => {
 		if (confidenceLevel === ConfidenceLevels.Ninety) {
 			if (pValue < 0.1 || pValue > 0.9) return 'Yes';
 		}
@@ -159,14 +162,28 @@ function Calculator() {
 		) {
 			setCalcState((prevState) => ({
 				...prevState,
-				confidence90: calcConfidence(ConfidenceLevels.Ninety),
-				confidence95: calcConfidence(ConfidenceLevels.NinetyFive),
-				confidence99: calcConfidence(ConfidenceLevels.NinetyNine),
 				zScore: calcZScore(
 					conversionRateControl,
 					conversionRateVariant
 				),
+			}));
+
+			setCalcState((prevState) => ({
+				...prevState,
 				pValue: calcPValue(zScore),
+			}));
+
+			setCalcState((prevState) => ({
+				...prevState,
+				confidence90: calcConfidence(ConfidenceLevels.Ninety, pValue),
+				confidence95: calcConfidence(
+					ConfidenceLevels.NinetyFive,
+					pValue
+				),
+				confidence99: calcConfidence(
+					ConfidenceLevels.NinetyNine,
+					pValue
+				),
 			}));
 		}
 	};
