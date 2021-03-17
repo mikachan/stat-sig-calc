@@ -64,24 +64,21 @@ function Calculator() {
 	};
 
 	const roundUp = (num: number): number => {
-		//return +num.toFixed(2);
-		return num;
+		return +num.toFixed(2);
 	};
 
 	const calcConversionRate = (
 		conversions: number,
 		visitors: number
 	): number => {
-		return roundUp(conversions / visitors);
+		return conversions / visitors;
 	};
 
 	const calcStandardError = (
 		conversionRate: number,
 		visitors: number
 	): number => {
-		return roundUp(
-			Math.sqrt((conversionRate * (1 - conversionRate)) / visitors)
-		);
+		return Math.sqrt((conversionRate * (1 - conversionRate)) / visitors);
 	};
 
 	const calcConfidence = (
@@ -114,7 +111,7 @@ function Calculator() {
 					Math.pow(standardErrorVariant, 2)
 			);
 
-		return roundUp(zScore);
+		return zScore;
 	};
 
 	const findNormalDistribution = (num: number) => {
@@ -122,7 +119,7 @@ function Calculator() {
 	};
 
 	const calcPValue = (zScore: number): number => {
-		return roundUp(findNormalDistribution(zScore));
+		return findNormalDistribution(zScore);
 	};
 
 	const calculateSignificance = () => {
@@ -244,8 +241,8 @@ function Calculator() {
 											}}
 										/>
 									</td>
-									<td>{conversionRateControl}</td>
-									<td>{standardErrorControl}</td>
+									<td>{roundUp(conversionRateControl)}</td>
+									<td>{roundUp(standardErrorControl)}</td>
 								</tr>
 								<tr>
 									<td>Variant</td>
@@ -284,8 +281,8 @@ function Calculator() {
 											}}
 										/>
 									</td>
-									<td>{conversionRateVariant}</td>
-									<td>{standardErrorVariant}</td>
+									<td>{roundUp(conversionRateVariant)}</td>
+									<td>{roundUp(standardErrorVariant)}</td>
 								</tr>
 								<tr>
 									<td colSpan={5} align="right">
@@ -323,11 +320,11 @@ function Calculator() {
 							</tr>
 							<tr>
 								<td>Z-score</td>
-								<td>{zScore}</td>
+								<td>{roundUp(zScore)}</td>
 							</tr>
 							<tr>
 								<td>P-value</td>
-								<td>{pValue}</td>
+								<td>{roundUp(pValue)}</td>
 							</tr>
 						</tbody>
 					</table>
